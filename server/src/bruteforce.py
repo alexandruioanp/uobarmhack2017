@@ -19,14 +19,21 @@ DOWN = b'c120'
 INIT_A = b'a180'
 INIT_B = b'b180'
 
+DET = b'd'
+ATA = b'e'
+
 # serial flag for debugging
 SEND = True
 
-if SEND:
-    ser = serial.Serial('/dev/ttyACM0', 115200)
-    ser.write(INIT_A)
-    ser.write(INIT_B)
-    ser.write(UP)
+def park_and_detach():
+    if SEND:
+        ser = serial.Serial('/dev/ttyACM0', 115200)
+        ser.write(INIT_A)
+        ser.write(INIT_B)
+        ser.write(UP)
+        ser.write(DET)
+
+park_and_detach()
 
 # separate thread for sending data to serial
 def serial_send(q):
@@ -62,6 +69,7 @@ class req_handler(BaseHTTPRequestHandler):
         q.put_nowait(UP)
 
         # to_plot = []
+        q.put_nowait(ATA)
 
         for i in range(count):
             pointX = float((post_data['p' + str(i) + 'x'])[0])
@@ -148,7 +156,7 @@ class req_handler(BaseHTTPRequestHandler):
 
                 # plt.plot(center2X, center2Y, 'rx')
 
-        q.put_nowait(UP)
+        park_and_detach()
 
 # start the HTTP server, binding it to all addresses, port 1180
 def run(server_class = HTTPServer, handler_class = req_handler, port = 1180):

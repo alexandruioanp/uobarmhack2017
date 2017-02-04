@@ -25,9 +25,11 @@ ATA = b'e'
 # serial flag for debugging
 SEND = True
 
+if SEND:
+    ser = serial.Serial('/dev/ttyACM0', 115200)
+
 def park_and_detach():
     if SEND:
-        ser = serial.Serial('/dev/ttyACM0', 115200)
         ser.write(INIT_A)
         ser.write(INIT_B)
         ser.write(UP)
